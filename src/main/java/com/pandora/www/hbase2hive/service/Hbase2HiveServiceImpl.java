@@ -20,6 +20,10 @@ public class Hbase2HiveServiceImpl {
         LOG.info("-------------Start deal with the data from----------" + startDate + "--To--" + endDate + "--");
         HashMap<String, String> resultMap = new HashMap<>();
 
+        String lastDataDate = endDate;
+        long inRowCount = 0;
+
+
         return resultMap;
 
     }
