@@ -13,7 +13,7 @@ import java.util.Map;
  *   那么一个列族中就一列，一列中的一行就是一天的成交数据。
  *
  */
-public class Hbase2HiveServiceImpl {
+public class Hbase2HiveServiceImpl implements Hbase2HiveService {
 
     private static Logger LOG = LoggerFactory.getLogger(Hbase2HiveServiceImpl.class);
     public Map<String, String> hbaseData2Hive(String startDate, String endDate) {
