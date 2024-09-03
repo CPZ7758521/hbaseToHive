@@ -1,8 +1,14 @@
 package com.pandora.www.hbase2hive.service;
 
+import com.pandora.www.hbase2hive.config.Config;
+import com.pandora.www.hbase2hive.utils.FileUtils;
+import com.pandora.www.hbase2hive.utils.HbaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,12 +22,22 @@ import java.util.Map;
 public class Hbase2HiveServiceImpl implements Hbase2HiveService {
 
     private static Logger LOG = LoggerFactory.getLogger(Hbase2HiveServiceImpl.class);
-    public Map<String, String> hbaseData2Hive(String startDate, String endDate) {
+    public Map<String, String> hbaseData2Hive(String startDate, String endDate) throws IOException {
         LOG.info("-------------Start deal with the data from----------" + startDate + "--To--" + endDate + "--");
         HashMap<String, String> resultMap = new HashMap<>();
 
         String lastDataDate = endDate;
         long inRowCount = 0;
+        FileUtils.deleteFile(Config.bjTableName);
+        FileUtils.deleteFile(Config.cjTableName);
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+        LocalDate nowDate = LocalDate.parse(startDate, dateTimeFormatter);
+
+        while (!nowDate.isAfter(LocalDate.parse(endDate))) {
+            HbaseUtils
+        }
 
 
         return resultMap;
