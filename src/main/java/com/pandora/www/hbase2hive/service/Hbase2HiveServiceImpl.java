@@ -1,5 +1,6 @@
 package com.pandora.www.hbase2hive.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.pandora.www.hbase2hive.config.Config;
 import com.pandora.www.hbase2hive.utils.FileUtils;
 import com.pandora.www.hbase2hive.utils.HbaseUtils;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,9 +38,50 @@ public class Hbase2HiveServiceImpl implements Hbase2HiveService {
         LocalDate nowDate = LocalDate.parse(startDate, dateTimeFormatter);
 
         while (!nowDate.isAfter(LocalDate.parse(endDate))) {
-            HbaseUtils
+            Map<String, List<JSONArray>> hbaseRowkeyRow = HbaseUtils.getHbaseRowkeyRow(dateTimeFormatter.format(nowDate));
+            if (hbaseRowkeyRow.isEmpty()) {
+
+                LOG.info("today did not have any data");
+                nowDate.plusDays(1);
+                continue;
+            } else {
+                lastDataDate = dateTimeFormatter.format(nowDate);
+
+                inRowCount++;
+                for (String family : hbaseRowkeyRow.keySet()) {
+                    String familyName = "";
+
+                    if ("cj".equals(family)) {
+                        familyName = Config.cjTableName;
+                    } else if ("bj".equals(family)) {
+                        familyName = Config.bjTableName;
+                    }
+
+                    FileUtils.appendFile(familyName, hbaseRowkeyRow.get(family), dateTimeFormatter.format(nowDate));
+
+                    LOG.info(familyName + " table date of " + dateTimeFormatter.format(nowDate) + "data is complete to CSV file");
+
+                }
+
+                nowDate.plusDays(1);
+            }
         }
 
+        LOG.info("start to push the data of " + Config.cjTableName + "to hdfs File System");
+        FileUtils.flushFile(Config.cjTableName);
+
+        LOG.info("start to push the data of " + Config.bjTableName + "to hdfs File System");
+        FileUtils.flushFile(Config.bjTableName);
+
+        LOG.info("data push complete");
+
+        FileUtils.deleteFile(Config.cjTableName);
+        FileUtils.deleteFile(Config.bjTableName);
+
+        LOG.info("tmp file is deleted");
+
+        resultMap.put("lastDataDate", lastDataDate);
+        resultMap.put("inRowCount", String.valueOf(inRowCount));
 
         return resultMap;
 
